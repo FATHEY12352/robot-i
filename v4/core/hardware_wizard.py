@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import platform
+import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -46,10 +47,10 @@ class HardwareWizard:
             self.root_dir = Path(__file__).resolve().parents[1]
         else:
             self.root_dir = Path(root_dir)
+        self._camera_lock = threading.Lock()
 
     # -------------------------------------------------------------------------
     # 1. Serial Port Discovery & Differential Scanning
-    # -------------------------------------------------------------------------
 
     def list_serial_ports(self) -> List[Dict[str, str]]:
         """Scans and returns all available serial ports with description and hardware ID."""
@@ -219,6 +220,9 @@ class HardwareWizard:
             return None
 
         cap = None
+        if not self._camera_lock.acquire(timeout=max(0.1, open_timeout)):
+            self.logger.warning(f"Camera {camera_index} is busy with another preview request.")
+            return None
         try:
             cv2.setNumThreads(1)
             try:
@@ -259,6 +263,7 @@ class HardwareWizard:
         finally:
             if cap is not None:
                 cap.release()
+            self._camera_lock.release()
 
     # -------------------------------------------------------------------------
     # 3. LeRobot Calibration Profile Scanning

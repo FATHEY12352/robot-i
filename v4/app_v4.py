@@ -708,6 +708,8 @@ class StudioApp(ctk.CTk):
     def _initial_probe(self) -> None:
         """Probes hardware and environment upon startup in non-blocking thread."""
         def _worker():
+            try:
+                env_sum = self.env_mgr.get_env_summary()
             except Exception as e:
                 self.logger.warning(f"Initial environment probe failed: {e}")
                 return
@@ -976,7 +978,7 @@ class StudioApp(ctk.CTk):
                         target_label.configure(image=ctk_img, text="")
                         self.logger.info(f"Captured live preview from {name} Camera {cam_idx}")
                     else:
-                        target_label.configure(image=self._blank_placeholder, text=f"Could not open\\n{name} Cam {cam_idx}!")
+                        target_label.configure(image=self._blank_placeholder, text=f"Could not open\n{name} Cam {cam_idx}!")
                         self.logger.warning(f"Could not open {name} Camera {cam_idx}")
                 except Exception as e:
                     self.logger.debug(f"UI preview update exception: {e}")
