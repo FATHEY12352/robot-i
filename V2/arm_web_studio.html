@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SO-101 (SO-ARM100) 3D URDF Digital Twin Studio</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #181a20 0%, #0a0b0e 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #e0e0e0;
+      user-select: none;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 420px;
+      max-height: 95vh;
+      overflow-y: auto;
+      background: rgba(20, 22, 28, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    }
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: #fcc419;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      background: #2b8a3e;
+      color: white;
+      font-weight: 600;
+    }
+    .badge.offline { background: #c92a2a; }
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #74c0fc;
+      margin: 14px 0 6px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 7px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .btn-orange { background: #f59f00; color: #1a1c23; }
+    .btn-red { background: #e03131; color: white; }
+    .btn-green { background: #2f9e44; color: white; }
+    .btn-blue { background: #1971c2; color: white; }
+    .btn-dark { background: #343a40; color: #adb5bd; border: 1px solid #495057; }
+    
+    .motor-card {
+      background: rgba(30, 34, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      transition: border-color 0.2s ease;
+    }
+    .motor-card:hover {
+      border-color: rgba(252, 196, 25, 0.35);
+    }
+    .motor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .motor-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #f1f3f5;
+    }
+    .motor-fw {
+      font-size: 10px;
+      background: rgba(51, 154, 240, 0.15);
+      color: #74c0fc;
+      border: 1px solid rgba(51, 154, 240, 0.3);
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .motor-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .metric-box {
+      background: rgba(15, 17, 21, 0.6);
+      border-radius: 6px;
+      padding: 4px 6px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .metric-lbl {
+      font-size: 9px;
+      color: #868e96;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metric-val {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e9ecef;
+      font-family: 'Consolas', monospace;
+    }
+    .metric-val.green { color: #51cf66; }
+    .metric-val.yellow { color: #fcc419; }
+    .metric-val.red { color: #ff6b6b; }
+
+    .grid-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 5px 0;
+      font-size: 12px;
+    }
+    .joint-name { width: 95px; font-weight: 600; color: #ced4da; }
+    .joint-val { font-family: monospace; color: #fcc419; width: 55px; text-align: right; }
+    .joint-bar-bg {
+      flex: 1;
+      height: 7px;
+      background: #2c2e33;
+      border-radius: 4px;
+      margin: 0 8px;
+      overflow: hidden;
+    }
+    .joint-bar-fill {
+      height: 100%;
+      background: #339af0;
+      width: 50%;
+      transition: width 0.04s linear;
+    }
+    .mini-btn {
+      padding: 3px 6px;
+      font-size: 10px;
+      border: 1px solid #495057;
+      background: #25262b;
+      color: #ced4da;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 3px;
+      font-weight: 600;
+    }
+    .mini-btn:hover { background: #373a40; color: white; border-color: #fcc419; }
+
+    #telemetry-hud {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      background: rgba(16, 18, 24, 0.90);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      pointer-events: none;
+    }
+    .hud-line { margin: 4px 0; }
+    .hud-val { color: #51cf66; font-weight: bold; }
+    #loading-banner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10,12,16,0.9);
+      padding: 18px 28px;
+      border-radius: 12px;
+      border: 1px solid #fcc419;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fcc419;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      display: none;
+    }
+  </style>
+
+  <!-- Local Offline-Capable JavaScript Assets -->
+  <script src="/assets/three.min.js"></script>
+  <script src="/assets/OrbitControls.js"></script>
+  <script src="/assets/STLLoader.js"></script>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  <div id="loading-banner">Assembling SO-101 3D CAD Robot Model...</div>
+
+  <div id="telemetry-hud">
+    <div class="hud-line">ROBOT: <span class="hud-val">SO-101 (SO-ARM100) ASSEMBLED URDF</span></div>
+    <div class="hud-line">PORT: <span class="hud-val">COM38 @ 1,000,000 BAUD (SYNC WRITE)</span></div>
+    <div class="hud-line">SUPPLY: <span id="hud-volt" class="hud-val">12.0 V</span></div>
+    <div class="hud-line">TCP COORDS: <span id="hud-ee" class="hud-val">X: 0 | Y: 0 | Z: 0 mm</span></div>
+    <div class="hud-line">TORQUE: <span id="hud-mode" class="hud-val">HOLD POSITION (LOCKED)</span></div>
+  </div>
+
+  <div id="ui-overlay">
+    <h2>
+      SO-101 3D Robot Studio
+      <span id="ws-badge" class="badge">Connecting...</span>
+    </h2>
+
+    <div style="background: rgba(43, 138, 62, 0.15); border: 1px solid rgba(43, 138, 62, 0.35); border-radius: 9px; padding: 10px 12px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 700; color: #51cf66; font-size: 12px;">✓ 6x Feetech STS3215 Servos Online</span>
+        <span style="background: #2b8a3e; color: white; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: bold;">v3.10 LATEST</span>
+      </div>
+      <div style="color: #adb5bd; font-size: 11px; margin-top: 4px; line-height: 1.4;">
+        All motors verified on latest official factory firmware (v3.10). Fully compatible with <b>Feetech FD Debugger</b>.
+      </div>
+    </div>
+
+    <div class="section-title">Lead-Through Kinesthetic Teaching</div>
+    <button id="btn-free" class="btn btn-orange" onclick="toggleFreeDrive()">🔓 Free Drive (Torque OFF - Hand Move)</button>
+    <button id="btn-record" class="btn btn-red" onclick="toggleRecord()">🔴 Start Recording Motion</button>
+    <div id="rec-info" style="font-size: 11px; text-align: center; color: #adb5bd; margin: 4px 0;">Frames: 0 (0.0s)</div>
+    <button id="btn-replay" class="btn btn-blue" onclick="playRecorded()">▶ Replay Recorded Motion</button>
+    <button class="btn btn-dark" style="margin-top: 5px; border: 1px solid #fcc419; color: #fcc419;" onclick="centerServos()">🎯 Center Servos to 2048 (Set Zero Pose)</button>
+
+    <div class="section-title">Joint Feedback & Raw Calibration</div>
+    <div id="joints-list"></div>
+
+    <button class="btn btn-green" style="margin-top: 10px;" onclick="saveCalibration()">💾 Save Calibration to calibration.json</button>
+
+    <div class="section-title">Preset Poses</div>
+    <div style="display: flex; gap: 6px;">
+      <button class="btn btn-dark" style="flex:1" onclick="sendPose('home')">🏠 Home</button>
+      <button class="btn btn-dark" style="flex:1" onclick="sendPose('rest')">🛌 Rest</button>
+      <button class="btn btn-dark" style="flex:1" onclick="sendPose('wave')">👋 Wave</button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // Three.js 3D Scene Initialization
+    // -------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111318);
+    scene.fog = new THREE.Fog(0x111318, 1.8, 5.0);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 50.0);
+    camera.position.set(0.40, 0.35, 0.50);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 0.15, 0);
+    controls.minDistance = 0.12;
+    controls.maxDistance = 2.5;
+
+    // Lighting Setup
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+    scene.add(new THREE.HemisphereLight(0xffeedd, 0x112233, 0.5));
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    dirLight.position.set(0.6, 1.2, 0.7);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.05;
+    dirLight.shadow.camera.far = 3.5;
+    scene.add(dirLight);
+
+    const fillLight = new THREE.PointLight(0x74c0fc, 1.2, 2.5);
+    fillLight.position.set(-0.5, 0.5, -0.4);
+    scene.add(fillLight);
+
+    // Floor Grid (Meters)
+    const grid = new THREE.GridHelper(1.6, 32, 0x339af0, 0x222630);
+    grid.position.y = 0;
+    scene.add(grid);
+
+    // -------------------------------------------------------------
+    // High-Quality SO-101 PBR Materials (Matching User's Photo)
+    // -------------------------------------------------------------
+    const yellowMat = new THREE.MeshStandardMaterial({
+      color: 0xfcc419, // Vibrant SO-101 3D printed yellow
+      roughness: 0.32,
+      metalness: 0.05
+    });
+    const darkMat = new THREE.MeshStandardMaterial({
+      color: 0x1c1e22, // Carbon black servo motor holder & brackets
+      roughness: 0.55,
+      metalness: 0.35
+    });
+
+    // -------------------------------------------------------------
+    // Build Hierarchical Kinematic Tree from Official URDF
+    // -------------------------------------------------------------
+    // Convert ROS Z-Up to Three.js Y-Up at the world root
+    const rosRoot = new THREE.Group();
+    rosRoot.rotation.x = -Math.PI / 2;
+    scene.add(rosRoot);
+
+    const loader = new THREE.STLLoader();
+
+    function loadMesh(filename, parent, mat, xyz, rpy) {
+      loader.load(`/assets/${filename}`, (geom) => {
+        geom.computeVertexNormals();
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.position.set(xyz[0], xyz[1], xyz[2]);
+        mesh.rotation.set(rpy[0], rpy[1], rpy[2], 'ZYX');
+        parent.add(mesh);
+      });
+    }
+
+    // 1. Base Link
+    const baseLink = new THREE.Group();
+    rosRoot.add(baseLink);
+    loadMesh('base_so101_v2.stl', baseLink, yellowMat, [-0.00636471, -8.97657e-09, -0.0024], [1.5708, -2.78073e-29, 1.5708]);
+    loadMesh('base_motor_holder_so101_v1.stl', baseLink, darkMat, [-0.00636471, -9.94414e-05, -0.0024], [1.5708, -1.67685e-15, 1.5708]);
+    loadMesh('waveshare_mounting_plate_so101_v2.stl', baseLink, yellowMat, [-0.0309827, -0.000199441, 0.0474], [1.5708, -1.35493e-14, 1.5708]);
+    loadMesh('sts3215_03a_v1.stl', baseLink, darkMat, [0.0263353, -8.97657e-09, 0.0437], [-8.21148e-16, 7.84513e-18, 1.249e-15]);
+
+    // Joint 1: Shoulder Pan (Base Yaw)
+    const j1Anchor = new THREE.Group();
+    j1Anchor.position.set(0.0388353, -8.97657e-09, 0.0624);
+    j1Anchor.rotation.set(3.14159, 4.18253e-17, -3.14159, 'ZYX');
+    baseLink.add(j1Anchor);
+
+    const j1Rot = new THREE.Group(); // Rotates around Z
+    j1Anchor.add(j1Rot);
+
+    // Shoulder Link
+    const shoulderLink = new THREE.Group();
+    j1Rot.add(shoulderLink);
+    loadMesh('rotation_pitch_so101_v1.stl', shoulderLink, yellowMat, [0.0122008, 2.22413e-05, 0.0464], [-1.5708, 2.35221e-33, 0]);
+    loadMesh('motor_holder_so101_base_v1.stl', shoulderLink, darkMat, [-0.0675992, -0.000177759, 0.0158499], [1.5708, -1.5708, 0]);
+    loadMesh('sts3215_03a_v1.stl', shoulderLink, darkMat, [-0.0303992, 0.000422241, -0.0417], [1.5708, 1.5708, 0]);
+
+    // Joint 2: Shoulder Lift
+    const j2Anchor = new THREE.Group();
+    j2Anchor.position.set(-0.0303992, -0.0182778, -0.0542);
+    j2Anchor.rotation.set(-1.5708, -1.5708, 0, 'ZYX');
+    shoulderLink.add(j2Anchor);
+
+    const j2Rot = new THREE.Group(); // Rotates around Z
+    j2Anchor.add(j2Rot);
+
+    // Upper Arm Link
+    const upperArmLink = new THREE.Group();
+    j2Rot.add(upperArmLink);
+    loadMesh('upper_arm_so101_v1.stl', upperArmLink, yellowMat, [-0.065085, 0.012, 0.0182], [3.14159, -0.0, -1.30911e-30]);
+    loadMesh('sts3215_03a_v1.stl', upperArmLink, darkMat, [-0.11257, -0.0155, 0.0187], [-3.14159, -5.27356e-16, -1.5708]);
+
+    // Joint 3: Elbow Flex
+    const j3Anchor = new THREE.Group();
+    j3Anchor.position.set(-0.11257, -0.028, 1.73763e-16);
+    j3Anchor.rotation.set(-3.63608e-16, 8.74301e-16, 1.5708, 'ZYX');
+    upperArmLink.add(j3Anchor);
+
+    const j3Rot = new THREE.Group(); // Rotates around Z
+    j3Anchor.add(j3Rot);
+
+    // Lower Arm Link
+    const lowerArmLink = new THREE.Group();
+    j3Rot.add(lowerArmLink);
+    loadMesh('under_arm_so101_v1.stl', lowerArmLink, yellowMat, [-0.0648499, -0.032, 0.0182], [3.14159, -0.0, 6.67202e-31]);
+    loadMesh('motor_holder_so101_wrist_v1.stl', lowerArmLink, darkMat, [-0.0648499, -0.032, 0.018], [-3.14159, -2.55351e-15, -1.83387e-30]);
+    loadMesh('sts3215_03a_v1.stl', lowerArmLink, darkMat, [-0.1224, 0.0052, 0.0187], [-3.14159, -7.88861e-31, -3.14159]);
+
+    // Joint 4: Wrist Flex
+    const j4Anchor = new THREE.Group();
+    j4Anchor.position.set(-0.1349, 0.0052, 3.62355e-17);
+    j4Anchor.rotation.set(4.02456e-15, 8.67362e-16, -1.5708, 'ZYX');
+    lowerArmLink.add(j4Anchor);
+
+    const j4Rot = new THREE.Group(); // Rotates around Z
+    j4Anchor.add(j4Rot);
+
+    // Wrist Link
+    const wristLink = new THREE.Group();
+    j4Rot.add(wristLink);
+    loadMesh('wrist_roll_pitch_so101_v2.stl', wristLink, yellowMat, [0.0, -0.028, 0.0181], [-1.5708, -1.5708, 0]);
+    loadMesh('sts3215_03a_no_horn_v1.stl', wristLink, darkMat, [8.32667e-17, -0.0424, 0.0306], [1.5708, 1.5708, 0]);
+
+    // Joint 5: Wrist Roll
+    const j5Anchor = new THREE.Group();
+    j5Anchor.position.set(5.55112e-17, -0.0611, 0.0181);
+    j5Anchor.rotation.set(1.5708, 0.0486795, 3.14159, 'ZYX');
+    wristLink.add(j5Anchor);
+
+    const j5Rot = new THREE.Group(); // Rotates around Z
+    j5Anchor.add(j5Rot);
+
+    // Gripper Link
+    const gripperLink = new THREE.Group();
+    j5Rot.add(gripperLink);
+    loadMesh('wrist_roll_follower_so101_v1.stl', gripperLink, yellowMat, [8.32667e-17, -0.000218214, 0.000949706], [-3.14159, -5.55112e-17, 0]);
+    loadMesh('sts3215_03a_v1.stl', gripperLink, darkMat, [0.0077, 0.0001, -0.0234], [-1.5708, -5.19179e-17, -1.66533e-16]);
+
+    // Joint 6: Gripper Moving Jaw
+    const j6Anchor = new THREE.Group();
+    j6Anchor.position.set(0.0202, 0.0188, -0.0234);
+    j6Anchor.rotation.set(1.5708, -5.24284e-08, -1.41553e-15, 'ZYX');
+    gripperLink.add(j6Anchor);
+
+    const j6Rot = new THREE.Group(); // Rotates around Z
+    j6Anchor.add(j6Rot);
+
+    const movingJawLink = new THREE.Group();
+    j6Rot.add(movingJawLink);
+    loadMesh('moving_jaw_so101_v1.stl', movingJawLink, darkMat, [-5.55112e-17, -5.55112e-17, 0.0189], [9.53145e-17, 6.93889e-18, 1.24077e-24]);
+
+    // -------------------------------------------------------------
+    // WebSocket Client & Live Synchronization
+    // -------------------------------------------------------------
+    let ws = null;
+    let isFreeDrive = false;
+    let isRecording = false;
+
+    function connectWebSocket() {
+      const loc = window.location;
+      const wsUrl = `ws://${loc.hostname}:8081`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById('ws-badge').textContent = 'CONNECTED';
+        document.getElementById('ws-badge').classList.remove('offline');
+      };
+
+      ws.onclose = () => {
+        document.getElementById('ws-badge').textContent = 'OFFLINE';
+        document.getElementById('ws-badge').classList.add('offline');
+        setTimeout(connectWebSocket, 1200);
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'init_info') {
+          if (msg.firmware) {
+            for (let sid = 1; sid <= 6; sid++) {
+              const fwElem = document.getElementById(`mfw-${sid}`);
+              if (fwElem) fwElem.textContent = msg.firmware[sid] || 'v3.10';
+            }
+          }
+        } else if (msg.type === 'telemetry') {
+          updateRobotPose(msg.angles, msg.raws, msg.voltage, msg.states);
+        } else if (msg.type === 'rec_status') {
+          document.getElementById('rec-info').textContent = `Recorded: ${msg.frames} frames (${msg.sec}s)`;
+        }
+      };
+    }
+
+    function updateRobotPose(angles, raws, volt, states) {
+      if (!angles) return;
+
+      // In URDF: Every joint rotates around its local Z axis [0, 0, 1]!
+      // Center at 2048 ticks / 180 deg (0 rad in kinematic zero-pose)
+      // Joint 2 and Joint 5 are inverted based on physical mounting
+      const q1 = raws ? ((raws[1] - 2048) * (Math.PI / 2048.0)) : THREE.MathUtils.degToRad(angles[1] - 180.0);
+      const q2 = raws ? -((raws[2] - 2048) * (Math.PI / 2048.0)) : -THREE.MathUtils.degToRad(angles[2] - 180.0);
+      const q3 = raws ? ((raws[3] - 2048) * (Math.PI / 2048.0)) : THREE.MathUtils.degToRad(angles[3] - 180.0);
+      const q4 = raws ? ((raws[4] - 2048) * (Math.PI / 2048.0)) : THREE.MathUtils.degToRad(angles[4] - 180.0);
+      const q5 = raws ? -((raws[5] - 2048) * (Math.PI / 2048.0)) : -THREE.MathUtils.degToRad(angles[5] - 180.0);
+      
+      // Joint 6 Gripper jaw angle (calibrated range)
+      const q6_raw = raws ? raws[6] : 2048;
+      const q6 = Math.max(0.0, Math.min(1.0, ((q6_raw - 1000) / 2000.0) * 0.9));
+
+      j1Rot.rotation.z = q1;
+      j2Rot.rotation.z = q2;
+      j3Rot.rotation.z = q3;
+      j4Rot.rotation.z = q4;
+      j5Rot.rotation.z = q5;
+      j6Rot.rotation.z = q6;
+
+      // Update Individual Motor Cards Telemetry
+      if (states) {
+        for (let sid = 1; sid <= 6; sid++) {
+          const st = states[sid];
+          if (!st) continue;
+
+          const angleElem = document.getElementById(`mval-angle-${sid}`);
+          if (angleElem) angleElem.textContent = `${st.angle.toFixed(1)}° (${st.raw_pos})`;
+
+          const barElem = document.getElementById(`mbar-${sid}`);
+          if (barElem) {
+            const pct = Math.min(100, Math.max(0, (st.raw_pos / 4096.0) * 100));
+            barElem.style.width = `${pct}%`;
+          }
+
+          const voltElem = document.getElementById(`mval-volt-${sid}`);
+          if (voltElem) voltElem.textContent = `${st.voltage.toFixed(1)}V`;
+
+          const tempElem = document.getElementById(`mval-temp-${sid}`);
+          if (tempElem) {
+            tempElem.textContent = `${st.temperature}°C`;
+            tempElem.className = 'metric-val ' + (st.temperature > 55 ? 'red' : st.temperature > 45 ? 'yellow' : 'green');
+          }
+
+          const loadElem = document.getElementById(`mval-load-${sid}`);
+          if (loadElem) {
+            loadElem.textContent = `${st.load.toFixed(1)}%`;
+            loadElem.className = 'metric-val ' + (Math.abs(st.load) > 60 ? 'red' : Math.abs(st.load) > 25 ? 'yellow' : 'green');
+          }
+
+          const currElem = document.getElementById(`mval-curr-${sid}`);
+          if (currElem) {
+            currElem.textContent = `${st.current_ma || 0} mA`;
+          }
+        }
+      }
+
+      // Update Telemetry HUD
+      if (volt) document.getElementById('hud-volt').textContent = `${volt.toFixed(1)} V`;
+
+      // End-Effector World Position (in mm)
+      const worldEE = new THREE.Vector3();
+      gripperLink.getWorldPosition(worldEE);
+      document.getElementById('hud-ee').textContent = `X: ${(worldEE.x * 1000).toFixed(0)} | Y: ${(worldEE.z * 1000).toFixed(0)} | Z: ${(worldEE.y * 1000).toFixed(0)} mm`;
+    }
+
+    // -------------------------------------------------------------
+    // UI Interaction Commands
+    // -------------------------------------------------------------
+    function toggleFreeDrive() {
+      isFreeDrive = !isFreeDrive;
+      const btn = document.getElementById('btn-free');
+      if (isFreeDrive) {
+        btn.textContent = '🔒 Lock Torque (Stop Free Drive)';
+        btn.classList.remove('btn-orange');
+        btn.classList.add('btn-green');
+        document.getElementById('hud-mode').textContent = 'FREE DRIVE (HAND TEACHING)';
+        ws.send(JSON.stringify({ cmd: 'free_drive', enable: true }));
+      } else {
+        btn.textContent = '🔓 Free Drive (Torque OFF - Hand Move)';
+        btn.classList.remove('btn-green');
+        btn.classList.add('btn-orange');
+        document.getElementById('hud-mode').textContent = 'HOLD POSITION (LOCKED)';
+        ws.send(JSON.stringify({ cmd: 'free_drive', enable: false }));
+      }
+    }
+
+    function toggleRecord() {
+      isRecording = !isRecording;
+      const btn = document.getElementById('btn-record');
+      if (isRecording) {
+        btn.textContent = '⏹ Stop Recording Motion';
+        btn.classList.add('btn-dark');
+        ws.send(JSON.stringify({ cmd: 'start_record' }));
+      } else {
+        btn.textContent = '🔴 Start Recording Motion';
+        btn.classList.remove('btn-dark');
+        ws.send(JSON.stringify({ cmd: 'stop_record' }));
+      }
+    }
+
+    function playRecorded() {
+      ws.send(JSON.stringify({ cmd: 'play_record' }));
+    }
+
+    function centerServos() {
+      if (confirm("Hold the arm in your desired ZERO / HOME position by hand, then click OK.\n\nAll 6 servos will be centered to 2048 (moving the 0/4096 seam away forever).")) {
+        ws.send(JSON.stringify({ cmd: 'center_servos' }));
+      }
+    }
+
+    function setLimit(jointId, type) {
+      ws.send(JSON.stringify({ cmd: 'set_limit', joint: jointId, type: type }));
+    }
+
+    function saveCalibration() {
+      ws.send(JSON.stringify({ cmd: 'save_calibration' }));
+      alert('Calibration saved to calibration.json!');
+    }
+
+    function sendPose(name) {
+      ws.send(JSON.stringify({ cmd: 'pose', name: name }));
+    }
+
+    // Generate Rich Motor Telemetry Cards
+    const jointMeta = {
+      1: { name: "Joint 1: Shoulder Pan (Base)", role: "Base Yaw" },
+      2: { name: "Joint 2: Shoulder Lift", role: "Main Pitch" },
+      3: { name: "Joint 3: Elbow Flex", role: "Elbow Extension" },
+      4: { name: "Joint 4: Wrist Flex", role: "Wrist Tilt" },
+      5: { name: "Joint 5: Wrist Roll", role: "Wrist Axial Roll" },
+      6: { name: "Joint 6: Gripper Jaw", role: "Parallel Finger" }
+    };
+    const jList = document.getElementById('joints-list');
+    jList.innerHTML = '';
+    for (let sid = 1; sid <= 6; sid++) {
+      const card = document.createElement('div');
+      card.className = 'motor-card';
+      card.innerHTML = `
+        <div class="motor-header">
+          <span class="motor-title">${jointMeta[sid].name}</span>
+          <div>
+            <span id="mfw-${sid}" class="motor-fw">v3.10</span>
+            <button class="mini-btn" style="margin-left: 5px;" onclick="setLimit(${sid}, 'min')">Min</button>
+            <button class="mini-btn" onclick="setLimit(${sid}, 'max')">Max</button>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0;">
+          <div class="joint-bar-bg" style="margin: 0; flex: 1;">
+            <div id="mbar-${sid}" class="joint-bar-fill" style="width: 50%;"></div>
+          </div>
+          <span id="mval-angle-${sid}" class="joint-val" style="width: 110px; font-size: 11px;">180.0° (2048)</span>
+        </div>
+        <div class="motor-metrics">
+          <div class="metric-box">
+            <div class="metric-lbl">⚡ Volt</div>
+            <div id="mval-volt-${sid}" class="metric-val green">12.0V</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-lbl">🌡️ Temp</div>
+            <div id="mval-temp-${sid}" class="metric-val green">30°C</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-lbl">💪 Torque</div>
+            <div id="mval-load-${sid}" class="metric-val green">0.0%</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-lbl">🔋 Current</div>
+            <div id="mval-curr-${sid}" class="metric-val">0 mA</div>
+          </div>
+        </div>
+      `;
+      jList.appendChild(card);
+    }
+
+    // -------------------------------------------------------------
+    // Animation Render Loop
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    connectWebSocket();
+  </script>
+</body>
+</html>

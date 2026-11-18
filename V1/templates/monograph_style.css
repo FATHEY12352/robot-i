@@ -1,0 +1,479 @@
+/* ==========================================================================
+   ROBOI Scientific Monograph & Techno-Economic Feasibility Dossier
+   Academic Arabic RTL Typography & CSS Paged Media Specification
+   ========================================================================== */
+
+@charset "UTF-8";
+
+/* --- CSS Paged Media Page Setup --- */
+@page {
+    size: A4 portrait;
+    margin: 20mm 15mm 20mm 15mm;
+    @bottom-center {
+        content: counter(page);
+        font-family: 'Dubai', 'Segoe UI', Arial, sans-serif;
+        font-size: 8.5pt;
+        color: #64748b;
+    }
+}
+
+@page :first {
+    margin: 15mm 15mm 15mm 15mm;
+    @bottom-center {
+        content: normal;
+    }
+}
+
+/* --- Base Body & Typography --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    direction: rtl;
+    lang: ar;
+}
+
+body {
+    direction: rtl;
+    font-family: 'Dubai', 'Arabic Typesetting', 'Segoe UI', Arial, Tahoma, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: #0f172a;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* --- Section Headings --- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Dubai', 'Segoe UI', Arial, sans-serif;
+    color: #0f172a;
+    page-break-after: avoid;
+    break-after: avoid;
+    line-height: 1.35;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+}
+
+h1 {
+    font-size: 21pt;
+    font-weight: 800;
+    color: #1e3a8a;
+    border-bottom: 3.5px solid #2563eb;
+    padding-bottom: 8px;
+    margin-top: 28px;
+    margin-bottom: 18px;
+    letter-spacing: -0.3px;
+}
+
+h2 {
+    font-size: 15.5pt;
+    font-weight: 700;
+    color: #1e293b;
+    border-right: 6px solid #2563eb;
+    padding-right: 12px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    background: linear-gradient(to left, #f8fafc, #ffffff);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: 0 4px 4px 0;
+}
+
+h3 {
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: #1e40af;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    padding-right: 6px;
+    border-right: 3px solid #93c5fd;
+}
+
+h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1em;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+/* --- Chapter Page Breaks --- */
+.chapter-container {
+    page-break-before: always;
+    break-before: page;
+}
+
+.chapter-container:first-of-type {
+    page-break-before: avoid;
+    break-before: avoid;
+}
+
+.page-break {
+    page-break-before: always;
+    break-before: page;
+}
+
+/* Avoid page break inside atomic components */
+table, figure, img, blockquote, .callout, pre, .math-display-container, tr, .kpi-card, .meta-box {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* --- LaTeX & Mathematical Formulations (LTR Isolation) --- */
+.katex, .katex-display, .math-ltr, .math-display-container, .katex-inline-container {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+}
+
+.katex-display-container, .math-display-container {
+    direction: ltr !important;
+    text-align: center !important;
+    margin: 14px 0 !important;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.katex-display {
+    direction: ltr !important;
+    text-align: center !important;
+    margin: 4px 0 !important;
+}
+
+.katex {
+    font-size: 1.08em !important;
+    text-rendering: auto;
+}
+
+.katex-inline-container {
+    display: inline-block;
+    padding: 0 3px;
+    vertical-align: middle;
+}
+
+/* --- Tables & Academic Financial Ledgers --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 8.8pt;
+    line-height: 1.45;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+thead {
+    background-color: #1e3a8a;
+    color: #ffffff;
+}
+
+thead th {
+    background-color: #1e3a8a;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 9px 11px;
+    text-align: right;
+    border: 1px solid #1e3a8a;
+    font-size: 9pt;
+    letter-spacing: 0.2px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+tbody td {
+    padding: 7px 10px;
+    border: 1px solid #e2e8f0;
+    vertical-align: middle;
+    text-align: right;
+    color: #1e293b;
+}
+
+/* Number, Latin and mathematical cells */
+td:has(.katex), td.ltr-cell, td:has(code) {
+    direction: ltr !important;
+    unicode-bidi: isolate;
+    text-align: center;
+}
+
+/* --- Blockquotes & Regulatory Callout Boxes --- */
+blockquote {
+    position: relative;
+    background: #f8fafc;
+    border-right: 5px solid #2563eb;
+    margin: 18px 0;
+    padding: 14px 20px;
+    border-radius: 6px;
+    color: #1e293b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* Dedicated Legal & Regulatory Box Styling */
+blockquote:has(strong:contains("ФАСИЕ")),
+blockquote:has(strong:contains("Постановление")),
+blockquote:has(strong:contains("44-ФЗ")),
+blockquote:has(strong:contains("Минпромторг")),
+.callout-legal {
+    background: #f0fdf4 !important;
+    border-right-color: #16a34a !important;
+    color: #14532d;
+}
+
+blockquote:has(strong:contains("تحذير")),
+blockquote:has(strong:contains("تنبيه")),
+.callout-warning {
+    background: #fffbeb !important;
+    border-right-color: #f59e0b !important;
+    color: #78350f;
+}
+
+/* --- Figures & Embedded CAD Renders --- */
+figure, .figure-container {
+    text-align: center;
+    margin: 22px auto;
+    page-break-inside: avoid;
+}
+
+img {
+    max-width: 92%;
+    max-height: 420px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.09);
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    object-fit: contain;
+}
+
+figcaption, em:has(img) + em, p > em {
+    display: block;
+    font-size: 9.2pt;
+    color: #475569;
+    font-style: normal;
+    font-weight: 600;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* --- Code Snippets, Firmware & Terminal Outputs --- */
+pre {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+    text-align: left;
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-family: 'Consolas', 'Cascadia Code', 'Courier New', monospace;
+    font-size: 8.2pt;
+    line-height: 1.45;
+    padding: 14px 16px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    margin: 16px 0;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+pre code {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+    border: none !important;
+}
+
+code {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+    font-family: 'Consolas', 'Cascadia Code', 'Courier New', monospace;
+    font-size: 8.8pt;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+/* --- Title Page & Meta Dossier Layout --- */
+.cover-page {
+    text-align: center;
+    padding: 40px 20px 20px 20px;
+    page-break-after: always;
+    break-after: page;
+}
+
+.cover-header-banner {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.cover-institution-ar {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 4px 0;
+}
+
+.cover-institution-ru {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #475569;
+    margin: 3px 0;
+}
+
+.cover-title-ar {
+    font-size: 23pt;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.3;
+    margin: 35px 0 15px 0;
+}
+
+.cover-subtitle-ar {
+    font-size: 14.5pt;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 25px;
+    line-height: 1.4;
+}
+
+.cover-title-ru {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #334155;
+    margin: 15px auto;
+    max-width: 90%;
+    line-height: 1.5;
+}
+
+.cover-title-en {
+    font-size: 10.5pt;
+    font-weight: 500;
+    color: #64748b;
+    margin: 10px auto;
+    max-width: 90%;
+    line-height: 1.5;
+}
+
+.cover-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 45px;
+    text-align: right;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.meta-box-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #1e3a8a;
+    border-bottom: 2px solid #93c5fd;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.meta-box-content {
+    font-size: 9pt;
+    color: #334155;
+    line-height: 1.55;
+}
+
+/* Lists */
+ul, ol {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    padding-right: 24px;
+}
+
+li {
+    margin-bottom: 0.35em;
+}
+
+/* Horizontal Divider */
+hr {
+    border: 0;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 24px 0;
+}
+
+/* Chapter 00 Official Title Page Styling */
+#chapter_00 > h1:first-of-type,
+#chapter_00 > h1:nth-of-type(2),
+#chapter_00 > h1:nth-of-type(3) {
+    text-align: center;
+    border-bottom: none;
+    margin: 6px 0;
+}
+
+#chapter_00 > h1:first-of-type {
+    font-size: 21pt;
+    color: #1e3a8a;
+    font-weight: 800;
+}
+
+#chapter_00 > h1:nth-of-type(2) {
+    font-size: 13pt;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+#chapter_00 > h1:nth-of-type(3) {
+    font-size: 12pt;
+    color: #475569;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+#chapter_00 h2 {
+    color: #1e3a8a;
+}
+
+#chapter_00 h3 {
+    text-align: center;
+    border-right: none;
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #334155;
+    margin: 4px 0;
+}
+
+#chapter_00 > p:has(strong) {
+    text-align: center;
+}
+

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SO-101 STUDIO V3 — Futuristic Robotic Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --panel-bg: rgba(14, 18, 27, 0.85);
+      --panel-border: rgba(0, 240, 255, 0.25);
+      --cyan-glow: #00f0ff;
+      --neon-green: #00ff88;
+      --amber-warn: #ffb703;
+      --red-alert: #ff0055;
+      --text-main: #e2e8f0;
+      --text-dim: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: 'Rajdhani', sans-serif; color: var(--text-main); }
+
+    #webgl-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+    /* Top HUD Header */
+    .hud-header {
+      position: absolute; top: 12px; left: 16px; right: 16px; height: 58px;
+      background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--panel-border);
+      border-radius: 10px; z-index: 10; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; box-shadow: 0 0 25px rgba(0, 240, 255, 0.12);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 16px; height: 16px; background: var(--cyan-glow); box-shadow: 0 0 12px var(--cyan-glow); transform: rotate(45deg); }
+    .brand-title { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--cyan-glow); }
+    .brand-version { font-family: 'Share Tech Mono', monospace; font-size: 11px; background: rgba(0, 240, 255, 0.15); color: var(--cyan-glow); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--cyan-glow); }
+
+    .header-metrics { display: flex; align-items: center; gap: 24px; font-family: 'Share Tech Mono', monospace; font-size: 13px; }
+    .metric-pill { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .status-dot.active { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+    .status-dot.warn { background: var(--amber-warn); box-shadow: 0 0 8px var(--amber-warn); }
+
+    /* Control Sidebars */
+    .sidebar {
+      position: absolute; top: 82px; bottom: 16px; z-index: 10;
+      background: var(--panel-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border); border-radius: 12px;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .sidebar-left { left: 16px; width: 440px; }
+    .sidebar-right { right: 16px; width: 380px; }
+
+    .panel-tabs { display: flex; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--panel-border); }
+    .tab-btn { flex: 1; padding: 12px 6px; background: transparent; border: none; color: var(--text-dim); font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s; text-align: center; }
+    .tab-btn:hover { color: var(--cyan-glow); background: rgba(0, 240, 255, 0.05); }
+    .tab-btn.active { color: #fff; background: rgba(0, 240, 255, 0.15); border-bottom: 2px solid var(--cyan-glow); }
+
+    .panel-content { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .panel-content::-webkit-scrollbar { width: 5px; }
+    .panel-content::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 4px; }
+
+    /* Futuristic Cyber Buttons */
+    .btn-cyber {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 119, 255, 0.2));
+      border: 1px solid var(--cyan-glow); color: #fff; padding: 10px 14px;
+      font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      border-radius: 6px; cursor: pointer; transition: 0.25s all; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-cyber:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.35), rgba(0, 119, 255, 0.45));
+      box-shadow: 0 0 16px var(--cyan-glow); transform: translateY(-1px);
+    }
+    .btn-cyber.success { border-color: var(--neon-green); background: rgba(0, 255, 136, 0.15); color: var(--neon-green); }
+    .btn-cyber.success:hover { background: rgba(0, 255, 136, 0.3); box-shadow: 0 0 16px var(--neon-green); }
+    .btn-cyber.danger { border-color: var(--red-alert); background: rgba(255, 0, 85, 0.15); color: var(--red-alert); }
+    .btn-cyber.danger:hover { background: rgba(255, 0, 85, 0.3); box-shadow: 0 0 16px var(--red-alert); }
+
+    /* Motor Card Grid */
+    .motor-card {
+      background: rgba(10, 14, 22, 0.85); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+      transition: 0.2s border-color; position: relative; overflow: hidden;
+    }
+    .motor-card:hover { border-color: rgba(0, 240, 255, 0.4); }
+    .motor-card.offline { opacity: 0.65; border-color: rgba(255, 183, 3, 0.4); }
+    .motor-card.offline::before {
+      content: "5-DOF UNWIRED"; position: absolute; right: 10px; top: 10px;
+      font-size: 9px; font-family: 'Share Tech Mono', monospace; background: var(--amber-warn);
+      color: #000; font-weight: 700; padding: 2px 6px; border-radius: 3px;
+    }
+
+    .motor-head { display: flex; justify-content: space-between; align-items: center; }
+    .motor-title { font-size: 13px; font-weight: 700; color: #fff; font-family: 'Orbitron', sans-serif; display: flex; align-items: center; gap: 6px; }
+    .motor-id-badge { background: rgba(0, 240, 255, 0.15); color: var(--cyan-glow); font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(0, 240, 255, 0.4); }
+    .motor-deg { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--cyan-glow); }
+
+    .slider-row { display: flex; align-items: center; gap: 10px; }
+    .cyber-range {
+      flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px;
+      background: #1a2233; outline: none; border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+    .cyber-range::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--cyan-glow); cursor: pointer; box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .motor-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px; text-align: center;
+    }
+    .stat-label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+    .stat-val { color: #fff; font-weight: 600; }
+
+    .motor-actions { display: flex; gap: 6px; margin-top: 2px; }
+    .btn-calib { flex: 1; padding: 4px; font-size: 10px; font-family: 'Orbitron', sans-serif; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--text-dim); border-radius: 4px; cursor: pointer; transition: 0.2s; }
+    .btn-calib:hover { color: var(--cyan-glow); border-color: var(--cyan-glow); background: rgba(0, 240, 255, 0.1); }
+
+    /* 3D Coordinate Target HUD */
+    .hud-target-card {
+      background: rgba(10, 14, 22, 0.9); border: 1px solid var(--panel-border);
+      border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .coord-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .coord-box { background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); }
+    .coord-label { font-size: 10px; color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; }
+    .coord-input { width: 100%; background: transparent; border: none; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 15px; outline: none; }
+
+    /* Bottom 3D Scene Controls */
+    .bottom-hud {
+      position: absolute; bottom: 20px; left: 476px; right: 416px;
+      display: flex; justify-content: center; gap: 12px; z-index: 10;
+    }
+  </style>
+  
+  <script src="/assets/three.min.js"></script>
+  <script src="/assets/OrbitControls.js"></script>
+  <script src="/assets/STLLoader.js"></script>
+</head>
+<body>
+
+  <!-- Three.js Canvas -->
+  <div id="webgl-canvas"></div>
+
+  <!-- HUD Header -->
+  <div class="hud-header">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <div class="brand-title">SO-101 STUDIO V3</div>
+      <div class="brand-version">NEURAL ARM OS</div>
+    </div>
+    <div class="header-metrics">
+      <div class="metric-pill">
+        <div id="dot-follower" class="status-dot"></div>
+        <span>FOLLOWER (COM38): <strong id="lbl-follower">SEARCHING</strong></span>
+      </div>
+      <div class="metric-pill">
+        <div id="dot-leader" class="status-dot"></div>
+        <span>LEADER (COM39): <strong id="lbl-leader">STANDBY</strong></span>
+      </div>
+      <div class="metric-pill">
+        <span>VOLTS: <strong id="lbl-voltage" style="color: var(--neon-green)">--.- V</strong></span>
+      </div>
+      <div class="metric-pill">
+        <span>FPS: <strong id="lbl-fps" style="color: var(--cyan-glow)">40</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left Sidebar: Joint Sliders & Telemetry -->
+  <div class="sidebar sidebar-left">
+    <div class="panel-tabs">
+      <button class="tab-btn active" onclick="switchLeftTab('servos')">SERVOS & TELEMETRY</button>
+      <button class="tab-btn" onclick="switchLeftTab('ik')">3D CARTESIAN (IK)</button>
+    </div>
+
+    <!-- Servos Tab -->
+    <div id="tab-servos" class="panel-content">
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-seq-test" class="btn-cyber success" style="flex: 2;" onclick="runSequentialTest()">
+          ⚡ RUN SEQUENTIAL MOTOR TEST (+10° / -10°)
+        </button>
+        <button id="btn-home" class="btn-cyber" style="flex: 1;" onclick="goHome()">
+          🏠 REST POSE
+        </button>
+      </div>
+
+      <div id="test-banner" style="display:none; padding:8px 12px; background: rgba(0, 255, 136, 0.1); border: 1px solid var(--neon-green); border-radius: 6px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--neon-green);">
+        [TEST IN PROGRESS] <span id="test-status-text">Testing Joint 1...</span>
+      </div>
+
+      <!-- 6 Servos Dynamic Cards Container -->
+      <div id="motors-container" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Populated via JavaScript for 6 joints -->
+      </div>
+    </div>
+
+    <!-- 3D Cartesian IK Tab -->
+    <div id="tab-ik" class="panel-content" style="display: none;">
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: var(--cyan-glow);">
+          TARGET END-EFFECTOR COORDINATES (XYZ)
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim);">
+          Click anywhere on the ground grid or enter XYZ values below to solve Inverse Kinematics and move the robot:
+        </p>
+        <div class="coord-grid">
+          <div class="coord-box">
+            <div class="coord-label">X (LATERAL mm)</div>
+            <input type="number" id="inp-ik-x" class="coord-input" value="0" step="5">
+          </div>
+          <div class="coord-box">
+            <div class="coord-label">Y (REACH mm)</div>
+            <input type="number" id="inp-ik-y" class="coord-input" value="180" step="5">
+          </div>
+          <div class="coord-box">
+            <div class="coord-label">Z (HEIGHT mm)</div>
+            <input type="number" id="inp-ik-z" class="coord-input" value="120" step="5">
+          </div>
+        </div>
+        <button class="btn-cyber" onclick="sendIKTarget()">🚀 SOLVE IK & DRIVE ARM</button>
+      </div>
+
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;">CURRENT CALCULATED POSE:</div>
+        <div id="current-fk-readout" style="font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--neon-green);">
+          X: --- mm | Y: --- mm | Z: --- mm
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar: Trajectory Recording, Diagnostics & Config -->
+  <div class="sidebar sidebar-right">
+    <div class="panel-tabs">
+      <button class="tab-btn active" onclick="switchRightTab('motion')">MOTION & RECORDER</button>
+      <button class="tab-btn" onclick="switchRightTab('config')">CONFIG & ID</button>
+    </div>
+
+    <!-- Motion Tab -->
+    <div id="tab-motion" class="panel-content">
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: var(--cyan-glow);">
+          CONTINUOUS TRAJECTORY RECORDER
+        </div>
+        <p style="font-size: 11px; color: var(--text-dim);">
+          Record live continuous arm movements at 50Hz (from Leader on COM39 or Free Drive Follower) and replay smoothly:
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-rec-start" class="btn-cyber danger" style="flex: 1;" onclick="startRecording()">🔴 START RECORD</button>
+          <button id="btn-rec-stop" class="btn-cyber" style="flex: 1;" onclick="stopRecording()" disabled>⏹ SAVE</button>
+        </div>
+        <div id="rec-feedback" style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan-glow); text-align: center;">
+          STATUS: READY
+        </div>
+      </div>
+
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700;">PLAYBACK ENGINE</div>
+        <select id="sel-trajectories" style="width: 100%; padding: 8px; background: #0c1017; border: 1px solid var(--panel-border); color: #fff; font-family: 'Share Tech Mono', monospace; border-radius: 4px; outline: none;">
+          <option value="">(No saved trajectories yet)</option>
+        </select>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-cyber success" style="flex: 2;" onclick="playSelectedTrajectory()">▶ PLAY ON FOLLOWER</button>
+          <button class="btn-cyber danger" style="flex: 1;" onclick="stopPlayback()">■ STOP</button>
+        </div>
+      </div>
+
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;">SPEED & ACCELERATION LIMITS</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px;">
+            <span>MAX VELOCITY:</span>
+            <span id="lbl-speed-val" style="color: var(--cyan-glow)">700 ticks/s</span>
+          </div>
+          <input type="range" class="cyber-range" min="100" max="2500" value="700" oninput="changeGlobalSpeed(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Config & ID Programmer Tab -->
+    <div id="tab-config" class="panel-content" style="display: none;">
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: var(--amber-warn);">
+          FEETECH SERVO ID REPROGRAMMER
+        </div>
+        <p style="font-size: 11px; color: var(--text-dim);">
+          Flash a new ID into the servo EEPROM. Disconnect all other servos when reprogramming an unassigned ID 1 motor!
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <input type="number" id="inp-from-id" placeholder="Old ID (e.g. 1)" class="coord-input" style="background:#0c1017; padding:6px; border:1px solid #333; border-radius:4px;">
+          <input type="number" id="inp-to-id" placeholder="New ID (1-6)" class="coord-input" style="background:#0c1017; padding:6px; border:1px solid #333; border-radius:4px;">
+        </div>
+        <button class="btn-cyber" onclick="reprogramServoID()">⚡ FLASH SERVO ID</button>
+        <div id="reprog-feedback" style="font-family: 'Share Tech Mono', monospace; font-size: 11px; text-align: center;"></div>
+      </div>
+
+      <div class="hud-target-card">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700;">TORQUE FREE DRIVE</div>
+        <p style="font-size: 11px; color: var(--text-dim);">
+          Turn off motor holding torque to enable manual hand guiding (lead-through teaching):
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-cyber" style="flex:1" onclick="setFreeDrive(true)">🔓 TORQUE OFF (FREE)</button>
+          <button class="btn-cyber success" style="flex:1" onclick="setFreeDrive(false)">🔒 TORQUE ON (HOLD)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Quick Controls -->
+  <div class="bottom-hud">
+    <button class="btn-cyber" onclick="reset3DCamera()">🎥 RESET 3D VIEW</button>
+    <button class="btn-cyber" onclick="toggle3DGrid()">🌐 TOGGLE GRID</button>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // Global Constants & State
+    // -------------------------------------------------------------
+    const JOINT_NAMES = {
+      1: "Shoulder Pan (Yaw)",
+      2: "Shoulder Lift (Pitch)",
+      3: "Elbow Flex",
+      4: "Wrist Pitch",
+      5: "Wrist Roll",
+      6: "Gripper Jaw"
+    };
+
+    let ws = null;
+    let scene, camera, renderer, controls;
+    let gridHelper;
+    let rosRoot, baseLink, j1Rot, shoulderLink, j2Rot, upperArmLink, j3Rot, lowerArmLink, j4Rot, wristLink, j5Rot, gripperLink, j6Rot, movingJawLink;
+    let targetMarker;
+
+    let currentAngles = { 1: 0, 2: -90, 3: 90, 4: 0, 5: 0, 6: 0 };
+    let currentRaws = { 1: 2048, 2: 2048, 3: 2048, 4: 2048, 5: 2048, 6: 2048 };
+    let isUserDragging = false;
+
+    // -------------------------------------------------------------
+    // Build Motor Cards UI
+    // -------------------------------------------------------------
+    function buildMotorCards() {
+      const container = document.getElementById("motors-container");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= 6; i++) {
+        const card = document.createElement("div");
+        card.id = `motor-card-${i}`;
+        card.className = "motor-card";
+        card.innerHTML = `
+          <div class="motor-head">
+            <div class="motor-title">
+              <span class="motor-id-badge">ID ${i}</span>
+              <span>${JOINT_NAMES[i]}</span>
+            </div>
+            <div class="motor-deg"><span id="lbl-deg-${i}">0.0</span>°</div>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="slider-${i}" class="cyber-range" min="-150" max="150" value="0" step="0.5"
+                   onmousedown="isUserDragging=true" onmouseup="isUserDragging=false" oninput="onSliderMove(${i}, this.value)">
+          </div>
+          <div class="motor-stats">
+            <div><div class="stat-label">RAW</div><div id="stat-raw-${i}" class="stat-val">2048</div></div>
+            <div><div class="stat-label">TEMP</div><div id="stat-temp-${i}" class="stat-val">--°C</div></div>
+            <div><div class="stat-label">VOLT</div><div id="stat-volt-${i}" class="stat-val">--V</div></div>
+            <div><div class="stat-label">CURRENT</div><div id="stat-curr-${i}" class="stat-val">--mA</div></div>
+          </div>
+          <div class="motor-actions">
+            <button class="btn-calib" onclick="setLimit(${i}, 'min')">SET MIN</button>
+            <button class="btn-calib" onclick="setLimit(${i}, 'zero')">SET ZERO</button>
+            <button class="btn-calib" onclick="setLimit(${i}, 'max')">SET MAX</button>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Three.js 3D Viewport Setup
+    // -------------------------------------------------------------
+    function init3D() {
+      const container = document.getElementById("webgl-canvas");
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x07090e);
+      scene.fog = new THREE.Fog(0x07090e, 1.2, 5.0);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 20);
+      camera.position.set(0.45, 0.45, 0.55);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 0.12, 0);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      mainLight.position.set(1.5, 2.5, 1.8);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      scene.add(mainLight);
+
+      // Cyan Accent Rim Light
+      const rimLight = new THREE.DirectionalLight(0x00f0ff, 0.9);
+      rimLight.position.set(-1.5, 1.5, -1.0);
+      scene.add(rimLight);
+
+      // Cyber Grid Floor
+      gridHelper = new THREE.GridHelper(1.6, 32, 0x00f0ff, 0x1a2638);
+      gridHelper.position.y = -0.001;
+      scene.add(gridHelper);
+
+      // Click Target Marker
+      const markerGeom = new THREE.SphereGeometry(0.012, 16, 16);
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true });
+      targetMarker = new THREE.Mesh(markerGeom, markerMat);
+      targetMarker.visible = false;
+      scene.add(targetMarker);
+
+      // Load SO-101 3D Kinematic Hierarchy
+      buildSO101Model();
+
+      window.addEventListener("resize", onWindowResize);
+      renderer.domElement.addEventListener("click", onSceneClick);
+
+      animate();
+    }
+
+    function buildSO101Model() {
+      // Materials
+      const yellowMat = new THREE.MeshStandardMaterial({
+        color: 0xfcc419, // Authentic SO-101 3D printed yellow
+        roughness: 0.35,
+        metalness: 0.05
+      });
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x1e2430, // Titanium Dark Grey for servo holders
+        roughness: 0.55,
+        metalness: 0.2
+      });
+      // Moving Jaw Distinctive Sleek Cyan/Silver Accent (FIX FOR MISSING JAW)
+      const movingJawMat = new THREE.MeshStandardMaterial({
+        color: 0x00e5ff, // High-contrast sleek neon cyan
+        roughness: 0.25,
+        metalness: 0.35,
+        emissive: 0x004455,
+        emissiveIntensity: 0.3
+      });
+
+      const loader = new THREE.STLLoader();
+      function loadMesh(filename, parent, mat, xyz, rpy) {
+        loader.load(`/assets/${filename}`, (geom) => {
+          geom.computeVertexNormals();
+          const mesh = new THREE.Mesh(geom, mat);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          mesh.position.set(xyz[0], xyz[1], xyz[2]);
+          mesh.rotation.set(rpy[0], rpy[1], rpy[2], 'ZYX');
+          parent.add(mesh);
+        });
+      }
+
+      rosRoot = new THREE.Group();
+      rosRoot.rotation.x = -Math.PI / 2;
+      scene.add(rosRoot);
+
+      // Base
+      baseLink = new THREE.Group();
+      rosRoot.add(baseLink);
+      loadMesh('base_so101_v2.stl', baseLink, yellowMat, [-0.00636, 0, -0.0024], [1.5708, 0, 1.5708]);
+      loadMesh('base_motor_holder_so101_v1.stl', baseLink, darkMat, [-0.00636, 0, -0.0024], [1.5708, 0, 1.5708]);
+      loadMesh('sts3215_03a_v1.stl', baseLink, darkMat, [0.0263, 0, 0.0437], [0, 0, 0]);
+
+      // Joint 1: Base Yaw
+      const j1Anchor = new THREE.Group();
+      j1Anchor.position.set(0, 0, 0.0542);
+      baseLink.add(j1Anchor);
+      j1Rot = new THREE.Group();
+      j1Anchor.add(j1Rot);
+
+      shoulderLink = new THREE.Group();
+      j1Rot.add(shoulderLink);
+      loadMesh('rotation_pitch_so101_v1.stl', shoulderLink, yellowMat, [0.0122, 0, 0.0464], [-1.5708, 0, 0]);
+      loadMesh('motor_holder_so101_base_v1.stl', shoulderLink, darkMat, [-0.0676, 0, 0.0158], [1.5708, -1.5708, 0]);
+      loadMesh('sts3215_03a_v1.stl', shoulderLink, darkMat, [-0.0304, 0, -0.0417], [1.5708, 1.5708, 0]);
+
+      // Joint 2: Shoulder Pitch
+      const j2Anchor = new THREE.Group();
+      j2Anchor.position.set(0, -0.0417, 0.0464);
+      j2Anchor.rotation.set(-1.5708, 0, 0, 'ZYX');
+      shoulderLink.add(j2Anchor);
+      j2Rot = new THREE.Group();
+      j2Anchor.add(j2Rot);
+
+      upperArmLink = new THREE.Group();
+      j2Rot.add(upperArmLink);
+      loadMesh('upper_arm_so101_v1.stl', upperArmLink, yellowMat, [-0.065, 0.012, 0.0182], [Math.PI, 0, 0]);
+      loadMesh('sts3215_03a_v1.stl', upperArmLink, darkMat, [-0.1125, -0.0155, 0.0187], [-Math.PI, 0, -1.5708]);
+
+      // Joint 3: Elbow Pitch
+      const j3Anchor = new THREE.Group();
+      j3Anchor.position.set(-0.1125, -0.0155, 0);
+      upperArmLink.add(j3Anchor);
+      j3Rot = new THREE.Group();
+      j3Anchor.add(j3Rot);
+
+      lowerArmLink = new THREE.Group();
+      j3Rot.add(lowerArmLink);
+      loadMesh('under_arm_so101_v1.stl', lowerArmLink, yellowMat, [-0.0648, -0.032, 0.0182], [Math.PI, 0, 0]);
+      loadMesh('motor_holder_so101_wrist_v1.stl', lowerArmLink, darkMat, [-0.0648, -0.032, 0.018], [-Math.PI, 0, 0]);
+      loadMesh('sts3215_03a_v1.stl', lowerArmLink, darkMat, [-0.1224, 0.0052, 0.0187], [-Math.PI, 0, -Math.PI]);
+
+      // Joint 4: Wrist Pitch
+      const j4Anchor = new THREE.Group();
+      j4Anchor.position.set(-0.1349, 0.0052, 0);
+      j4Anchor.rotation.set(0, 0, -1.5708, 'ZYX');
+      lowerArmLink.add(j4Anchor);
+      j4Rot = new THREE.Group();
+      j4Anchor.add(j4Rot);
+
+      wristLink = new THREE.Group();
+      j4Rot.add(wristLink);
+      loadMesh('wrist_roll_pitch_so101_v2.stl', wristLink, yellowMat, [0, -0.028, 0.0181], [-1.5708, -1.5708, 0]);
+      loadMesh('sts3215_03a_no_horn_v1.stl', wristLink, darkMat, [0, -0.0424, 0.0306], [1.5708, 1.5708, 0]);
+
+      // Joint 5: Wrist Roll
+      const j5Anchor = new THREE.Group();
+      j5Anchor.position.set(0, -0.0611, 0.0181);
+      j5Anchor.rotation.set(1.5708, 0.0486, Math.PI, 'ZYX');
+      wristLink.add(j5Anchor);
+      j5Rot = new THREE.Group();
+      j5Anchor.add(j5Rot);
+
+      // Gripper Base & Fixed Jaw
+      gripperLink = new THREE.Group();
+      j5Rot.add(gripperLink);
+      loadMesh('wrist_roll_follower_so101_v1.stl', gripperLink, yellowMat, [0, -0.0002, 0.00095], [-Math.PI, 0, 0]);
+      loadMesh('sts3215_03a_v1.stl', gripperLink, darkMat, [0.0077, 0.0001, -0.0234], [-1.5708, 0, 0]);
+
+      // Joint 6: Gripper Moving Jaw (NOW PROPERLY ANCHORED & ILLUMINATED)
+      const j6Anchor = new THREE.Group();
+      j6Anchor.position.set(0.0202, 0.0188, -0.0234);
+      j6Anchor.rotation.set(1.5708, 0, 0, 'ZYX');
+      gripperLink.add(j6Anchor);
+
+      j6Rot = new THREE.Group();
+      j6Anchor.add(j6Rot);
+
+      movingJawLink = new THREE.Group();
+      j6Rot.add(movingJawLink);
+      loadMesh('moving_jaw_so101_v1.stl', movingJawLink, movingJawMat, [0, 0, 0.0189], [0, 0, 0]);
+    }
+
+    // -------------------------------------------------------------
+    // Update 3D Joints & Visual State
+    // -------------------------------------------------------------
+    function updateArmVisuals(angles, raws) {
+      if (!j1Rot) return;
+
+      const q1 = THREE.MathUtils.degToRad(angles[1] || 0);
+      const q2 = THREE.MathUtils.degToRad(angles[2] || -90);
+      const q3 = THREE.MathUtils.degToRad(angles[3] || 90);
+      const q4 = THREE.MathUtils.degToRad(angles[4] || 0);
+      const q5 = THREE.MathUtils.degToRad(angles[5] || 0);
+
+      // Safe Gripper calculation (Prevents NaN bug when ID 6 is unwired)
+      const raw6 = (raws && raws[6] !== undefined && !isNaN(raws[6])) ? raws[6] : 2048;
+      const q6 = Math.max(0.0, Math.min(1.2, ((raw6 - 1500) / 2500.0) * 1.0));
+
+      j1Rot.rotation.z = q1;
+      j2Rot.rotation.z = q2 + Math.PI / 2;
+      j3Rot.rotation.z = q3 - Math.PI / 2;
+      j4Rot.rotation.z = q4;
+      j5Rot.rotation.z = q5;
+      j6Rot.rotation.z = q6; // Accurately moves the driven cyan jaw!
+    }
+
+    // -------------------------------------------------------------
+    // WebSocket Telemetry Connection
+    // -------------------------------------------------------------
+    function connectWS() {
+      const host = window.location.hostname || "localhost";
+      ws = new WebSocket(`ws://${host}:8081`);
+
+      ws.onopen = () => {
+        console.log("[WS] Connected to V3 Studio Server");
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === "telemetry") {
+          currentAngles = msg.angles;
+          currentRaws = msg.raws;
+
+          // Update 3D scene
+          updateArmVisuals(currentAngles, currentRaws);
+
+          // Update UI metrics
+          if (msg.states && msg.states[1]) {
+            document.getElementById("lbl-voltage").innerText = `${msg.states[1].voltage.toFixed(1)} V`;
+          }
+
+          document.getElementById("dot-follower").className = "status-dot active";
+          document.getElementById("lbl-follower").innerText = msg.is_mock ? "VIRTUAL MOCK" : "ONLINE (5-DOF)";
+
+          // Update Motor Cards
+          for (let sid = 1; sid <= 6; sid++) {
+            const st = msg.states[sid];
+            if (st) {
+              const degEl = document.getElementById(`lbl-deg-${sid}`);
+              if (degEl) degEl.innerText = st.angle.toFixed(1);
+
+              const sliderEl = document.getElementById(`slider-${sid}`);
+              if (sliderEl && !isUserDragging) sliderEl.value = st.angle;
+
+              const rawEl = document.getElementById(`stat-raw-${sid}`);
+              if (rawEl) rawEl.innerText = st.raw_pos;
+
+              const tempEl = document.getElementById(`stat-temp-${sid}`);
+              if (tempEl) tempEl.innerText = `${st.temperature}°C`;
+
+              const voltEl = document.getElementById(`stat-volt-${sid}`);
+              if (voltEl) voltEl.innerText = `${st.voltage.toFixed(1)}V`;
+
+              const currEl = document.getElementById(`stat-curr-${sid}`);
+              if (currEl) currEl.innerText = `${st.current_ma}mA`;
+
+              const cardEl = document.getElementById(`motor-card-${sid}`);
+              if (cardEl) {
+                if (st.is_online === false) {
+                  cardEl.classList.add("offline");
+                } else {
+                  cardEl.classList.remove("offline");
+                }
+              }
+            }
+          }
+
+          // Update FK readout
+          if (msg.fk) {
+            document.getElementById("current-fk-readout").innerText =
+              `X: ${msg.fk.x.toFixed(1)} mm | Y: ${msg.fk.y.toFixed(1)} mm | Z: ${msg.fk.z.toFixed(1)} mm`;
+          }
+        }
+        else if (msg.type === "init_status") {
+          if (msg.trajectories) updateTrajectoryList(msg.trajectories);
+        }
+        else if (msg.type === "seq_test_step") {
+          const banner = document.getElementById("test-banner");
+          banner.style.display = "block";
+          document.getElementById("test-status-text").innerText = `Joint ${msg.joint}: ${msg.status}`;
+        }
+        else if (msg.type === "seq_test_complete") {
+          const banner = document.getElementById("test-banner");
+          document.getElementById("test-status-text").innerText = msg.message;
+          setTimeout(() => { banner.style.display = "none"; }, 3000);
+        }
+        else if (msg.type === "record_complete") {
+          document.getElementById("rec-feedback").innerText = `SAVED: ${msg.filename} (${msg.frames_count} frames)`;
+          if (msg.trajectories) updateTrajectoryList(msg.trajectories);
+          document.getElementById("btn-rec-start").disabled = false;
+          document.getElementById("btn-rec-stop").disabled = true;
+        }
+      };
+
+      ws.onclose = () => {
+        document.getElementById("dot-follower").className = "status-dot";
+        document.getElementById("lbl-follower").innerText = "DISCONNECTED";
+        setTimeout(connectWS, 1500);
+      };
+    }
+
+    // -------------------------------------------------------------
+    // User Actions
+    // -------------------------------------------------------------
+    function onSliderMove(joint, deg) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "set_joint", joint: joint, degrees: parseFloat(deg) }));
+      }
+    }
+
+    function runSequentialTest() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "run_sequential_test" }));
+      }
+    }
+
+    function goHome() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "go_home" }));
+      }
+    }
+
+    function setLimit(joint, type) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "set_limit", arm: "follower", joint: joint, type: type }));
+      }
+    }
+
+    function setFreeDrive(enable) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "free_drive", arm: "follower", enable: enable }));
+      }
+    }
+
+    function sendIKTarget() {
+      const x = parseFloat(document.getElementById("inp-ik-x").value);
+      const y = parseFloat(document.getElementById("inp-ik-y").value);
+      const z = parseFloat(document.getElementById("inp-ik-z").value);
+
+      if (targetMarker) {
+        targetMarker.position.set(x / 1000.0, z / 1000.0, -y / 1000.0);
+        targetMarker.visible = true;
+      }
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "click_to_move", x: x, y: y, z: z }));
+      }
+    }
+
+    function startRecording() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "start_record", hz: 50 }));
+        document.getElementById("rec-feedback").innerText = "🔴 RECORDING IN PROGRESS...";
+        document.getElementById("btn-rec-start").disabled = true;
+        document.getElementById("btn-rec-stop").disabled = false;
+      }
+    }
+
+    function stopRecording() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "stop_record" }));
+      }
+    }
+
+    function updateTrajectoryList(list) {
+      const sel = document.getElementById("sel-trajectories");
+      sel.innerHTML = "";
+      if (!list || list.length === 0) {
+        sel.innerHTML = '<option value="">(No saved trajectories)</option>';
+        return;
+      }
+      list.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.filename;
+        opt.innerText = `${item.name} (${item.frames} frames)`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function playSelectedTrajectory() {
+      const filename = document.getElementById("sel-trajectories").value;
+      if (filename && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "play_trajectory", filename: filename, speed_factor: 1.0 }));
+      }
+    }
+
+    function stopPlayback() {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "stop_playback" }));
+      }
+    }
+
+    function reprogramServoID() {
+      const fromId = parseInt(document.getElementById("inp-from-id").value);
+      const toId = parseInt(document.getElementById("inp-to-id").value);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "reprogram_servo_id", from_id: fromId, to_id: toId }));
+      }
+    }
+
+    function changeGlobalSpeed(val) {
+      document.getElementById("lbl-speed-val").innerText = `${val} ticks/s`;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(json.stringify({ cmd: "set_speed", speed: parseInt(val) }));
+      }
+    }
+
+    function onSceneClick(event) {
+      // Raycast to ground plane for click-to-move
+      const rect = renderer.domElement.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+
+      const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const targetPoint = new THREE.Vector3();
+
+      if (raycaster.ray.intersectPlane(groundPlane, targetPoint)) {
+        // Convert to millimeters
+        const x_mm = targetPoint.x * 1000.0;
+        const y_mm = -targetPoint.z * 1000.0;
+        const z_mm = 60.0; // default height above table
+
+        document.getElementById("inp-ik-x").value = x_mm.toFixed(0);
+        document.getElementById("inp-ik-y").value = y_mm.toFixed(0);
+        document.getElementById("inp-ik-z").value = z_mm.toFixed(0);
+
+        sendIKTarget();
+      }
+    }
+
+    function reset3DCamera() {
+      camera.position.set(0.45, 0.45, 0.55);
+      controls.target.set(0, 0.12, 0);
+    }
+
+    function toggle3DGrid() {
+      if (gridHelper) gridHelper.visible = !gridHelper.visible;
+    }
+
+    function switchLeftTab(tabId) {
+      document.getElementById("tab-servos").style.display = tabId === "servos" ? "flex" : "none";
+      document.getElementById("tab-ik").style.display = tabId === "ik" ? "flex" : "none";
+      const tabs = document.querySelectorAll(".sidebar-left .tab-btn");
+      tabs[0].classList.toggle("active", tabId === "servos");
+      tabs[1].classList.toggle("active", tabId === "ik");
+    }
+
+    function switchRightTab(tabId) {
+      document.getElementById("tab-motion").style.display = tabId === "motion" ? "flex" : "none";
+      document.getElementById("tab-config").style.display = tabId === "config" ? "flex" : "none";
+      const tabs = document.querySelectorAll(".sidebar-right .tab-btn");
+      tabs[0].classList.toggle("active", tabId === "motion");
+      tabs[1].classList.toggle("active", tabId === "config");
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Initialize UI on load
+    window.addEventListener("DOMContentLoaded", () => {
+      buildMotorCards();
+      init3D();
+      connectWS();
+    });
+  </script>
+</body>
+</html>

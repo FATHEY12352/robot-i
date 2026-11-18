@@ -1,0 +1,449 @@
+{
+  "total_checks": 8,
+  "passed_checks": 8,
+  "failed_checks": 0,
+  "warnings_count": 1,
+  "all_passed": true,
+  "results": {
+    "CHECK_1_CHAPTER_COMPLETENESS": {
+      "name": "Chapter Completeness & Academic Content Density",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "00_front_matter.md": {
+          "exists": true,
+          "chars": 17932,
+          "words": 2963,
+          "dense": true
+        },
+        "01_section_i_executive_summary.md": {
+          "exists": true,
+          "chars": 17500,
+          "words": 2924,
+          "dense": true
+        },
+        "02_section_ii_actuator_kinematics.md": {
+          "exists": true,
+          "chars": 30123,
+          "words": 5337,
+          "dense": true
+        },
+        "03_section_iii_opensource_taxonomy.md": {
+          "exists": true,
+          "chars": 46740,
+          "words": 7201,
+          "dense": true
+        },
+        "04_section_iv_pedagogical_framework.md": {
+          "exists": true,
+          "chars": 33942,
+          "words": 5244,
+          "dense": true
+        },
+        "05_section_v_competitive_benchmarking.md": {
+          "exists": true,
+          "chars": 23618,
+          "words": 4038,
+          "dense": true
+        },
+        "06_section_vi_russian_regulatory.md": {
+          "exists": true,
+          "chars": 22499,
+          "words": 3810,
+          "dense": true
+        },
+        "07_section_vii_financial_engineering.md": {
+          "exists": true,
+          "chars": 16969,
+          "words": 3093,
+          "dense": true
+        },
+        "08_appendices.md": {
+          "exists": true,
+          "chars": 21166,
+          "words": 3470,
+          "dense": true
+        },
+        "aggregate_total_characters": 230489,
+        "aggregate_total_words": 38080,
+        "estimated_page_count": 100.2
+      }
+    },
+    "CHECK_2_FOUR_TIER_BOM_PRESENCE": {
+      "name": "4-Tier Manipulator Taxonomy & Numeric Cost Tables",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "Tier A": {
+          "present": true,
+          "has_rub_currency": true,
+          "has_tables": true
+        },
+        "Tier B": {
+          "present": true,
+          "has_rub_currency": true,
+          "has_tables": true
+        },
+        "Tier C": {
+          "present": true,
+          "has_rub_currency": true,
+          "has_tables": true
+        },
+        "Tier D": {
+          "present": true,
+          "has_rub_currency": true,
+          "has_tables": true
+        }
+      }
+    },
+    "CHECK_3_BOM_ARITHMETIC_CONSISTENCY": {
+      "name": "BOM Financial Ledger & Laboratory Arithmetic Consistency",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "reference_model_arithmetic_valid": true,
+        "batch_checks": [
+          {
+            "model": "Min",
+            "batch": 10,
+            "unit_cost": 24600,
+            "batch_total": 246000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Min",
+            "batch": 50,
+            "unit_cost": 19750,
+            "batch_total": 987500,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Min",
+            "batch": 200,
+            "unit_cost": 15800,
+            "batch_total": 3160000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Avg",
+            "batch": 10,
+            "unit_cost": 34800,
+            "batch_total": 348000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Avg",
+            "batch": 50,
+            "unit_cost": 28150,
+            "batch_total": 1407500,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Avg",
+            "batch": 200,
+            "unit_cost": 22800,
+            "batch_total": 4560000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Max",
+            "batch": 10,
+            "unit_cost": 50000,
+            "batch_total": 500000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Max",
+            "batch": 50,
+            "unit_cost": 41200,
+            "batch_total": 2060000,
+            "unit_found": true,
+            "total_found": true
+          },
+          {
+            "model": "Max",
+            "batch": 200,
+            "unit_cost": 34000,
+            "batch_total": 6800000,
+            "unit_found": true,
+            "total_found": true
+          }
+        ],
+        "lab_10_station_math": {
+          "station_unit_sum": 120000,
+          "ten_station_total": 1200000,
+          "hands_on_multiplier": 10.0,
+          "valid": true
+        },
+        "lab_total_in_text": true,
+        "lab_unit_in_text": true
+      }
+    },
+    "CHECK_4_LATEX_MATH_SYNTAX": {
+      "name": "LaTeX Math Delimiter Balance & Syntax Validation",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "00_front_matter.md": {
+          "display_math_blocks": 0,
+          "inline_math_blocks": 212,
+          "syntax_errors": 0
+        },
+        "01_section_i_executive_summary.md": {
+          "display_math_blocks": 4,
+          "inline_math_blocks": 178,
+          "syntax_errors": 0
+        },
+        "02_section_ii_actuator_kinematics.md": {
+          "display_math_blocks": 71,
+          "inline_math_blocks": 496,
+          "syntax_errors": 0
+        },
+        "03_section_iii_opensource_taxonomy.md": {
+          "display_math_blocks": 29,
+          "inline_math_blocks": 363,
+          "syntax_errors": 0
+        },
+        "04_section_iv_pedagogical_framework.md": {
+          "display_math_blocks": 29,
+          "inline_math_blocks": 412,
+          "syntax_errors": 0
+        },
+        "05_section_v_competitive_benchmarking.md": {
+          "display_math_blocks": 2,
+          "inline_math_blocks": 194,
+          "syntax_errors": 0
+        },
+        "06_section_vi_russian_regulatory.md": {
+          "display_math_blocks": 0,
+          "inline_math_blocks": 176,
+          "syntax_errors": 0
+        },
+        "07_section_vii_financial_engineering.md": {
+          "display_math_blocks": 4,
+          "inline_math_blocks": 173,
+          "syntax_errors": 0
+        },
+        "08_appendices.md": {
+          "display_math_blocks": 11,
+          "inline_math_blocks": 192,
+          "syntax_errors": 0
+        },
+        "total_inline_math_found": 558,
+        "total_display_math_found": 150
+      }
+    },
+    "CHECK_5_PEDAGOGICAL_COMPLETENESS": {
+      "name": "Pedagogical Completeness & 10-Laboratory Syllabus",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "lab_1": {
+          "topic": "DH Parameters / URDF",
+          "enumerated": true
+        },
+        "lab_2": {
+          "topic": "Forward Kinematics & Reachability",
+          "enumerated": true
+        },
+        "lab_3": {
+          "topic": "Inverse Kinematics & Singularities",
+          "enumerated": true
+        },
+        "lab_4": {
+          "topic": "Jacobian & Manipulability",
+          "enumerated": true
+        },
+        "lab_5": {
+          "topic": "Dynamics & Trajectory (Quintic)",
+          "enumerated": true
+        },
+        "lab_6": {
+          "topic": "Embedded Middleware / micro-ROS",
+          "enumerated": true
+        },
+        "lab_7": {
+          "topic": "Impedance Control & Safety",
+          "enumerated": true
+        },
+        "lab_8": {
+          "topic": "Perception & Hand-Eye Calibration",
+          "enumerated": true
+        },
+        "lab_9": {
+          "topic": "Physical AI & ACT (LeRobot)",
+          "enumerated": true
+        },
+        "lab_10": {
+          "topic": "Diffusion Policy & VLA",
+          "enumerated": true
+        },
+        "contains_experimental_objectives": true,
+        "contains_student_competencies": true
+      }
+    },
+    "CHECK_6_REGULATORY_FIDELITY": {
+      "name": "Russian Regulatory, Procurement & Grant Framework Fidelity",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "Federal Law 44-FZ": true,
+        "Federal Law 223-FZ": true,
+        "Decree No. 719 (Minpromtorg)": true,
+        "Decree No. 878 («второй лишний»)": true,
+        "FASIE / Bortnik Fund": true,
+        "Student Startup (1M RUB)": true,
+        "Start-1 Grant (up to 5M RUB)": true,
+        "Priority 2030 (Приоритет 2030)": true,
+        "PISH (ПИШ / Advanced Engineering Schools)": true
+      }
+    },
+    "CHECK_7_VISUAL_ASSETS": {
+      "name": "Visual Assets, Kinematic Diagrams & Image URL Validation",
+      "passed": true,
+      "errors": [],
+      "warnings": [
+        "Could not reach image URL (https://upload.wikimedia.org/wikipedia/commons/0/09/SCARA_robot_2R.png): HTTP Error 429: Too many requests (76af2b0)"
+      ],
+      "details": {
+        "total_figures_found": 18,
+        "figures": [
+          {
+            "caption": "Classic DH Parameters Convention",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Classic_DH_Parameters_Convention.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Cycloidal Drive Component Architecture",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Cycloidal_drive_parts.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Harmonic Drive Precision Gear Set",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Harmonic_Drive_AG_strain_wave_gear_set.jpg",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "SCARA 2R Kinematic Model",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/SCARA_robot_2R.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "SO-100 Open-Source Physical AI Manipulator",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/so100-lerobot.jpg",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "LeRobot Motor Bus Configuration",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/motor_ids.webp",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "SO-101 Follower Manipulator",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/SO101_Follower.webp",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Feetech Servo Zero Offset Calibration",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/feetech-reset-offset.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Vision-Language-Action Model Pipeline",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/xvla-architecture.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Classic DH Parameters Convention",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Classic_DH_Parameters_Convention.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "SCARA 2R Kinematic Model",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/SCARA_robot_2R.png",
+            "valid_format": true,
+            "reachable": false
+          },
+          {
+            "caption": "SO-100 Open-Source Physical AI Manipulator",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/so100-lerobot.jpg",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Dual-Arm Teleoperation: SO-101 Follower Setup",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/SO101_Follower.webp",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Vision-Language-Action Model Pipeline",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/xvla-architecture.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "LeRobot Motor Bus Configuration",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/motor_ids.webp",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Feetech Servo Zero Offset Calibration",
+            "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/lerobot/feetech-reset-offset.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Cycloidal Drive Component Architecture",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Cycloidal_drive_parts.png",
+            "valid_format": true,
+            "reachable": true
+          },
+          {
+            "caption": "Harmonic Drive Precision Gear Set",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Harmonic_Drive_AG_strain_wave_gear_set.jpg",
+            "valid_format": true,
+            "reachable": true
+          }
+        ],
+        "valid_urls_count": 18
+      }
+    },
+    "CHECK_8_PDF_COMPILATION_INTEGRITY": {
+      "name": "PDF Compilation Execution & Publication Page Count Audit (>=80 Pages)",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "details": {
+        "pdf_path": "D:\\projekt\\ARM\\output\\ROBOI_Scientific_Monograph_Dossier.pdf",
+        "file_size_bytes": 9926930,
+        "file_size_kb": 9694.3,
+        "page_count": 122
+      }
+    }
+  }
+}

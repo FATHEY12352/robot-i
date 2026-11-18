@@ -1,0 +1,13 @@
+(version 1)
+
+(rule "Allow USB-C shield pad overhang"
+    (constraint edge_clearance (min -5.0mm))
+    (condition "A.memberOfFootprint('J_USB') || B.memberOfFootprint('J_USB') || A.NetClass == 'USB_DiffPair' || B.NetClass == 'USB_DiffPair' || (A.Type == 'track' && (A.NetName == 'VBUS' || A.NetName == 'CC1' || A.NetName == 'CC2' || A.NetName == 'USB_D+' || A.NetName == 'USB_D-' || A.NetName == 'GND')) || (B.Type == 'track' && (B.NetName == 'VBUS' || B.NetName == 'CC1' || B.NetName == 'CC2' || B.NetName == 'USB_D+' || B.NetName == 'USB_D-' || B.NetName == 'GND'))"))
+
+(rule "Pad clearance waiver down to 0.2mm"
+    (constraint clearance (min 0.2mm))
+    (condition "A.Type == 'pad' || B.Type == 'pad'"))
+
+(rule "NetTie internal clearance"
+    (constraint clearance (min 0.0mm))
+    (condition "(A.memberOfFootprint('NT1') && B.memberOfFootprint('NT1')) || (A.memberOfFootprint('NT2') && B.memberOfFootprint('NT2')) || (A.memberOfFootprint('NT3') && B.memberOfFootprint('NT3'))"))

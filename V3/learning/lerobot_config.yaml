@@ -1,0 +1,7 @@
+robot_type: 'so101_follower'
+robot_port: 'COM38'
+leader_port: 'COM39'
+fps: 30
+cameras: {}
+dataset_repo_id: 'local/so101'
+num_episodes: 50

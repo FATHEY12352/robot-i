@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أطروحة أذرع الذكاء الاصطناعي الفيزيائي والروبوتات التعاونية مفتوحة المصدر - دراسة الجدوى العلمية والتوطين الصناعي والأكاديمي</title>
+    
+    <!-- KaTeX CSS: Local path from output directory + CDN fallback -->
+    <link rel="stylesheet" href="../templates/katex/katex.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';">
+    
+    <style>
+/* Embedded Monograph Publication Stylesheet */
+__MONOGRAPH_STYLES__
+    </style>
+
+    <!-- KaTeX JS: Local path from output directory + CDN fallback -->
+    <script src="../templates/katex/katex.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';"></script>
+    <script src="../templates/katex/auto-render.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';"></script>
+    
+    <script>
+        function runKaTeX() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false,
+                    trust: true,
+                    strict: false
+                });
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runKaTeX);
+        } else {
+            runKaTeX();
+        }
+    </script>
+</head>
+<body dir="rtl">
+__MONOGRAPH_BODY__
+</body>
+</html>

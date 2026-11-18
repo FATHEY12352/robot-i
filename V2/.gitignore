@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.pem
+*.zip
+datasets/
+outputs/
+V3/datasets/
+V3/outputs/
+V3/trajectories/*.json
+V3/calibration/calibration.json

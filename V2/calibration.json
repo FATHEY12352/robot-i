@@ -1,0 +1,44 @@
+{
+    "1": {
+        "name": "Shoulder Pan (Base)",
+        "raw_min": 733,
+        "raw_max": 3433,
+        "center": 2048,
+        "desc": "Min=Right, Max=Left"
+    },
+    "2": {
+        "name": "Shoulder Lift",
+        "raw_min": 2609,
+        "raw_max": 990,
+        "center": 2048,
+        "desc": "Min=Forward, Max=Backward"
+    },
+    "3": {
+        "name": "Elbow Flex",
+        "raw_min": 3212,
+        "raw_max": 952,
+        "center": 2048,
+        "desc": "Min=Bent, Max=Extended"
+    },
+    "4": {
+        "name": "Wrist Flex",
+        "raw_min": 1374,
+        "raw_max": 2844,
+        "center": 2048,
+        "desc": "Min=Down, Max=Up"
+    },
+    "5": {
+        "name": "Wrist Roll",
+        "raw_min": 2019,
+        "raw_max": 1162,
+        "center": 2048,
+        "desc": "Min=CW, Max=CCW"
+    },
+    "6": {
+        "name": "Gripper",
+        "raw_min": 1749,
+        "raw_max": 237,
+        "center": 1200,
+        "desc": "Min=Fully Closed, Max=Fully Open"
+    }
+}

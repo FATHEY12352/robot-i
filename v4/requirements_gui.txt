@@ -1,0 +1,7 @@
+# Lightweight GUI and hardware discovery dependencies for SO-101 Robotics Studio V4
+# Note: LeRobot and PyTorch (CUDA) are managed via core/env_manager.py or start_v4 bootstrapper
+customtkinter>=5.2.0
+pyserial>=3.5
+opencv-python>=4.8.0
+pillow>=10.0.0
+packaging>=23.0
